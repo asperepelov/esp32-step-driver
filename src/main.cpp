@@ -1,9 +1,14 @@
+/* Настройки для управления шаговым двигателем трекера Chinowing Tracking System V31
+управление через Microstep Driver TB6600
+Microstep = 4, 90град = 1080 импульсов, 1град = 12 импульсов
+*/
+
 #include <Arduino.h>
 
 #define STEP_PIN 12  // GPIO13 (D13) подключен к PUL+ на TB6600
 #define DIR_PIN 13   // GPIO12 (D12) подключен к DIR+ на TB6600
 #define ENA_PIN 14   // GPIO14 (D14) подключен к ENA+ на TB6600
-#define PULSE_CNT 200 // Кол-во импульсов
+#define PULSE_CNT 1080 // Кол-во импульсов
 
 // Прототип функции
 void step();
@@ -53,7 +58,7 @@ void loop() {
   turnMotor(pulseCnt, TurnDirection::Minus);
   
   Serial.println("Ожидание 3 секунды");
-  delay(3000); 
+  delay(5000); 
 }
 
 void step() {
