@@ -1,3 +1,6 @@
+#ifndef STEP_MOTOR_H
+#define STEP_MOTOR_H
+
 #include <Arduino.h>
 
 // Направление поворота
@@ -30,3 +33,4 @@ public:
     void turn(int pulseCnt, TurnDirection dir);
 };
 
+#endif // STEP_MOTOR_H

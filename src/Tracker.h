@@ -1,3 +1,6 @@
+#ifndef TRACKER_H
+#define TRACKER_H
+
 #include <Arduino.h>
 #include "StepMotor.h"
 
@@ -20,3 +23,5 @@ public:
     // Поворот на заданный угол от -360 до 360
     void turnAzimut(int16_t angle);
 };
+
+#endif // TRACKER_H
