@@ -27,13 +27,13 @@ void loop() {
   tracker->online();
 
   Serial.println("Поворот на " + String(angle));
-  tracker->turnAzimut(angle);
+  tracker->turnAzimuthAngle(angle);
   
   Serial.println("Ожидание...");
   delay(5000); 
   
   Serial.println("Поворот на " + String(-angle));
-  tracker->turnAzimut(-angle);
+  tracker->turnAzimuthAngle(-angle);
   
   Serial.println("Перевод в оффлайн");
   tracker->offline();

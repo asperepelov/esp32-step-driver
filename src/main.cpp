@@ -14,7 +14,7 @@ Microstep = 4, 90град = 1080 импульсов, 1град = 12 импуль
 #define ENA_PIN 14   // GPIO14 (D14) подключен к ENA+ на TB6600
 
 StepMotor motor(STEP_PIN, DIR_PIN, ENA_PIN, 2000);
-Tracker tracker(&motor, 12, false);
+Tracker tracker(&motor, 12, false, TrackerState::Online);
 CommandHandler commandHandler(&tracker);
 
 #define SSID "fix_tr"
@@ -70,10 +70,14 @@ void loop() {
       if (client.available()) {
         String line = client.readStringUntil('\n');
         line.trim();
-        // commandHandler.
         
-        // Отправляем ответ клиенту (необязательно)
-        // client.println("Сообщение получено");
+        TrackerResult res = commandHandler.handleCommand(line);
+        if (res.code == TrackerResultCode::Success) {
+          if (res.message != "") {client.println(res.message);}
+          else {client.println("Выполнено");}
+        } else {
+          client.println("Ошибка: " + res.message);
+        }
       }
     }
     
