@@ -10,7 +10,7 @@ private:
 public:
     CommandHandler(Tracker* tracker);
     // Обработать команду
-    TrackerResult handleCommand(const String& jsonString);
+    Result handleCommand(const String& jsonString);
 };
 
 #endif // COMMAND_HANDLER_H

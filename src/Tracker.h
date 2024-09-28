@@ -2,6 +2,7 @@
 #define TRACKER_H
 
 #include <Arduino.h>
+#include "Result.h"
 #include "StepMotor.h"
 
 // Состояние трекера
@@ -10,50 +11,36 @@ enum class TrackerState {
     Online   // Моторы включены, трекер управляется
 };
 
-// Коды результатов операций трекера
-enum class TrackerResultCode {
-    Success,
-    TrackerIsOffline,
-    AngleOutOfRange,
-    UnknownCommand,
-    CommandError
-};
-
-// Структура для возврата результата операции
-struct TrackerResult {
-    TrackerResultCode code;
-    String message;
-
-    TrackerResult(TrackerResultCode c, const String& msg) 
-        : code(c), message(msg) {}
-};
-
+// Трекер
 class Tracker
 {
 private:
     StepMotor *_azimuthMotor; // Шаговый двигатель вращения по азимуту
-    int _azimPulsPerAngle; // Количество импульсов для поворота на 1 градус по азимуту
+    uint32_t _azimPulsPerAngle; // Количество импульсов для поворота на 1 градус по азимуту
+    uint16_t _azimSmothAngle; // Угол по азимуту на котором применяется постепенное ускорение или торможение поворота
     bool _azimDirectionInversion; // Инверсия вращения мотора по азимуту
     int16_t _currentAzimuth; // Текущий азимут от 0 до 360 град, 0 - является поворотной точкой
     TrackerState _currentState; // Текущее состояние трекера
 
-    TrackerResult checkAzimuth(int16_t azimuth); // Проверка допустимости азимута
+    Result checkAzimuth(int16_t azimuth); // Проверка допустимости азимута
 
 public:
-    /* *motor - указатель StepMotor
+    /* motor - Шаговый двигатель
     azimPulsPerAngle - Количество импульсов для поворота на 1 градус по азимуту
-    azimDirectionInversion - Инверсия вращения мотора по азимуту */    
-    Tracker(StepMotor *motor, int azimPulsPerAngle, bool azimDirectionInversion, TrackerState state);
+    azimSmothAngle - Угол по азимуту на котором применяется постепенное ускорение или торможение поворота
+    azimDirectionInversion - Инверсия вращения мотора по азимуту 
+    state - состояние в которое перевести трекер*/    
+    Tracker(StepMotor* motor, uint32_t azimPulsPerAngle, uint16_t azimSmothAngle, bool azimDirectionInversion, TrackerState state);
     // Режим онлайн - программное управление
-    TrackerResult online();
+    Result online();
     // Режим оффлайн - отключение приводов
-    TrackerResult offline();       
+    Result offline();       
     // Поворот по азимуту на заданный угол
-    TrackerResult turnAzimuthAngle(int16_t angle);
+    Result turnAzimuthAngle(int16_t angle);
     // Поворот в азимут
-    TrackerResult turnToAzimuth(int16_t azimuth);
+    Result turnToAzimuth(int16_t azimuth);
     // Установить текущий азимут
-    TrackerResult setCurrentAzimuth(int16_t azimuth);
+    Result setCurrentAzimuth(int16_t azimuth);
     // Получить текущий азимут
     int16_t getCurrentAzimuth() {return _currentAzimuth;}
 };

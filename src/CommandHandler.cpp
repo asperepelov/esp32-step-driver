@@ -2,16 +2,16 @@
 
 CommandHandler::CommandHandler(Tracker* tracker) : _tracker(tracker) {}
 
-TrackerResult CommandHandler::handleCommand(const String& jsonString) {
+Result CommandHandler::handleCommand(const String& jsonString) {
     DynamicJsonDocument doc(256);
     DeserializationError error = deserializeJson(doc, jsonString);
 
     if (error) {
-        return TrackerResult(TrackerResultCode::CommandError, "Ошибка разбора JSON");
+        return Result(ResultCode::CommandError, "Ошибка разбора JSON");
     }
 
     if (!doc.containsKey("command") || !doc.containsKey("value")) {
-        return TrackerResult(TrackerResultCode::CommandError, "Неверный формат команды");
+        return Result(ResultCode::CommandError, "Неверный формат команды");
     }
 
     String command = doc["command"];
@@ -32,15 +32,15 @@ TrackerResult CommandHandler::handleCommand(const String& jsonString) {
         } else if (value == 0) {
             return _tracker->offline();
         } else {
-            return TrackerResult(TrackerResultCode::CommandError, "Недопустимое значение для set_online");
+            return Result(ResultCode::CommandError, "Недопустимое значение для set_online");
         }
     }
     else if (command == "get_current_azimuth") {
-            return TrackerResult(TrackerResultCode::Success, String(_tracker->getCurrentAzimuth()));
+            return Result(ResultCode::Success, String(_tracker->getCurrentAzimuth()));
     }
     else {
-        return TrackerResult(
-            TrackerResultCode::UnknownCommand, 
+        return Result(
+            ResultCode::UnknownCommand, 
             "Неизвестная команда: " + command
             );
         

@@ -1,59 +1,59 @@
 #include "Tracker.h"
 
-Tracker::Tracker(StepMotor *motor, int azimPulsPerAngle, bool directionInversion, TrackerState state)
-    : _azimuthMotor(motor), _azimPulsPerAngle(azimPulsPerAngle), _azimDirectionInversion(directionInversion) {
+Tracker::Tracker(StepMotor *motor, uint32_t azimPulsPerAngle, uint16_t azimSmothAngle, bool directionInversion, TrackerState state)
+    : _azimuthMotor(motor), _azimPulsPerAngle(azimPulsPerAngle), _azimSmothAngle(azimSmothAngle), _azimDirectionInversion(directionInversion) {
         if (state == TrackerState::Offline) { this->offline();}
         if (state == TrackerState::Online) { this->online();}
     }
 
-TrackerResult Tracker::online() {
+Result Tracker::online() {
     _currentState = TrackerState::Online;
     _azimuthMotor->enable();
 
-    return TrackerResult(
-        TrackerResultCode::Success,
+    return Result(
+        ResultCode::Success,
         "Трекер переведен в онлайн, управление активировано"
     );
 }
 
-TrackerResult Tracker::offline() {
+Result Tracker::offline() {
     _currentState = TrackerState::Offline;
     _azimuthMotor->disable();
 
-    return TrackerResult(
-        TrackerResultCode::Success,
+    return Result(
+        ResultCode::Success,
         "Трекер переведен в оффлайн, отключение управления"
     );
 }
 
-TrackerResult Tracker::checkAzimuth(int16_t azimuth) {
+Result Tracker::checkAzimuth(int16_t azimuth) {
     if (azimuth < 0 || azimuth >= 360) {
-        return TrackerResult(
-            TrackerResultCode::AngleOutOfRange,
+        return Result(
+            ResultCode::ParamOutOfRange,
             "Азимут вне допустимого диапазона (0-359)"
         );
     }
 
-    return TrackerResult(TrackerResultCode::Success, "");   
+    return Result(ResultCode::Success, "");   
 }
 
 
-TrackerResult Tracker::setCurrentAzimuth(int16_t azimuth) {
-    TrackerResult res = checkAzimuth(azimuth);
-    if (res.code != TrackerResultCode::Success) {return res;}
+Result Tracker::setCurrentAzimuth(int16_t azimuth) {
+    Result res = checkAzimuth(azimuth);
+    if (res.code != ResultCode::Success) {return res;}
 
     _currentAzimuth = azimuth;
 
-    return TrackerResult(
-        TrackerResultCode::Success,
+    return Result(
+        ResultCode::Success,
         "Установлен текущий азимут " + String(_currentAzimuth)
     );
 }
 
-TrackerResult Tracker::turnAzimuthAngle(int16_t angle) {    
+Result Tracker::turnAzimuthAngle(int16_t angle) {    
     if (_currentState == TrackerState::Offline) {
-        return TrackerResult(
-            TrackerResultCode::TrackerIsOffline,
+        return Result(
+            ResultCode::TrackerIsOffline,
             "Трекер находится в оффлайн"
         );
     }
@@ -85,26 +85,29 @@ TrackerResult Tracker::turnAzimuthAngle(int16_t angle) {
         else {dir = TurnDirection::Minus;}
     }
 
-    _azimuthMotor->turn(pulses, dir);
+    // определяем скорость вращения
+    if (abs(calcAngle) <= 2*_azimSmothAngle) {_azimuthMotor->turnSlowly(pulses, dir);} // медленно
+    else {_azimuthMotor->turnSmoothly(pulses, _azimSmothAngle*_azimPulsPerAngle, dir);} // с ускорением
+    
     _currentAzimuth = newAzim;
 
-    return TrackerResult(
-        TrackerResultCode::Success,
+    return Result(
+        ResultCode::Success,
         "Трекер повернулся по азимуту на " + String(calcAngle) + " градусов"
     );
 }
 
-TrackerResult Tracker::turnToAzimuth(int16_t azimuth) {
-    TrackerResult res = checkAzimuth(azimuth);
-    if (res.code != TrackerResultCode::Success) {return res;}
+Result Tracker::turnToAzimuth(int16_t azimuth) {
+    Result res = checkAzimuth(azimuth);
+    if (res.code != ResultCode::Success) {return res;}
 
     int16_t angle = azimuth - _currentAzimuth;
     
     res = turnAzimuthAngle(angle);
-    if (res.code != TrackerResultCode::Success) {return res;}
+    if (res.code != ResultCode::Success) {return res;}
 
-    return TrackerResult(
-        TrackerResultCode::Success,
+    return Result(
+        ResultCode::Success,
         "Трекер повернулся на азимут " + String(azimuth)
     );
 }  
