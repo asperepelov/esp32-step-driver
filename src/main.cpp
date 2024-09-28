@@ -6,62 +6,51 @@ Microstep = 4, 90град = 1080 импульсов, 1град = 12 импуль
 #include <Arduino.h>
 #include "Tracker.h"
 #include "CommandHandler.h"
-#include <WiFi.h>
+#include "EthernetManager.h"
 #include <stdlib.h>
 
-#define STEP_PIN 12  // GPIO13 (D13) подключен к PUL+ на TB6600
-#define DIR_PIN 13   // GPIO12 (D12) подключен к DIR+ на TB6600
-#define ENA_PIN 14   // GPIO14 (D14) подключен к ENA+ на TB6600
+//================================================================
+// Настройки трекера
+#define DIR_PIN 2 // GPIO12 (D12) подключен к DIR+ на TB6600
+#define STEP_PIN 4 // GPIO13 (D13) подключен к PUL+ на TB6600
+#define ENA_PIN 12 // GPIO14 (D14) подключен к ENA+ на TB6600
 
 StepMotor motor(STEP_PIN, DIR_PIN, ENA_PIN, 500, 2000);
 Tracker tracker(&motor, 12, 10, false, TrackerState::Online);
 CommandHandler commandHandler(&tracker);
-
-#define SSID "fix_tr"
-#define PSWD "24000000"
-
-// Задаем статический IP-адрес
+//================================================================
+// Настройки сети
 IPAddress local_IP(192, 168, 144, 54);
 IPAddress gateway(192, 168, 144, 1);
-IPAddress subnet(255, 255, 255, 0);
-
-WiFiServer server(80);
-
+IPAddress netMask(255, 255, 255, 0);
+EthernetManager ethernetManager(local_IP, gateway, netMask);
+//================================================================
+// TCP сервер
+#define TCP_PORT 80
+WiFiServer tcpServer(TCP_PORT);
+//================================================================
 
 void setup() {
   Serial.begin(115200);
   Serial.println("СТАРТ");
 
-  // Настраиваем статический IP-адрес
-  if (!WiFi.softAPConfig(local_IP, gateway, subnet)) {
-    Serial.println("Ошибка конфигурации статического IP");
-  }
-
-  // Создаем Wi-Fi точку доступа
-  WiFi.softAP(SSID, PSWD);
-
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print("IP-адрес точки доступа: ");
-  Serial.println(IP);
-
-  // Запускаем TCP сервер
-  server.begin();
-  Serial.println("Сервер запущен");  
+    Serial.println("Инициализация Ethernet...");
+    if (ethernetManager.begin()) {
+        // wifiManager.setup();
+        tcpServer.begin();
+        Serial.println("TCP сервер запущен");
+    } else {
+        Serial.println("Не удалось запустить Ethernet. Перезагрузка...");
+        ESP.restart();
+    }
 
   // Активируем двигатель трекера
   tracker.online();
   Serial.println("Трекер переведён в онлайн");
-
-}
-
-bool isNumber(const String& str) {
-    char* endptr = nullptr;
-    strtol(str.c_str(), &endptr, 10);
-    return *endptr == '\0';
 }
 
 void loop() {
-  WiFiClient client = server.available();
+  WiFiClient client = tcpServer.available();
 
   if (client) {
     Serial.println("Новый клиент подключен");
