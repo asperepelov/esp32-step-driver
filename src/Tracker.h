@@ -11,6 +11,30 @@ enum class TrackerState {
     Online   // Моторы включены, трекер управляется
 };
 
+class Location {
+public:
+    double _lat; // Широта
+    double _lon; // Долгота
+
+    Location(double lat, double lon): _lat(lat), _lon(lon) {}
+    // Проверка валидности
+    bool isValid() {
+        if (_lat < -90 || _lat > 90 || _lon < -180 || _lon > 180) {return false;}
+        return true;
+    }
+    // Перегрузка оператора приведения к String
+    operator String() const {
+        char buffer[50];
+        snprintf(buffer, sizeof(buffer), "%.7f, %.7f", _lat, _lon);
+        return String(buffer);
+    }
+};
+
+struct RadialLocation {
+    double distance; // Дистанция
+    double azimuth; // Азимут
+};
+
 // Трекер
 class Tracker
 {
@@ -21,6 +45,7 @@ private:
     bool _azimDirectionInversion; // Инверсия вращения мотора по азимуту
     int16_t _currentAzimuth; // Текущий азимут от 0 до 360 град, 0 - является поворотной точкой
     TrackerState _currentState; // Текущее состояние трекера
+    Location _currentLocation; // Текущая локация трекера
 
     Result checkAzimuth(int16_t azimuth); // Проверка допустимости азимута
 
@@ -43,6 +68,15 @@ public:
     Result setCurrentAzimuth(int16_t azimuth);
     // Получить текущий азимут
     int16_t getCurrentAzimuth() {return _currentAzimuth;}
+    // Установить текущую позицию трекера
+    Result setCurrentLocation(Location loc);
+    // Получить текущую позицию трекера
+    Location* getCurrentLocation() {return &_currentLocation;}
+    /* Расчитать азимут и дистанцию на объект
+    lat - широта объекта в градусах
+    lon - долгота объекта в градусах */
+    RadialLocation calcRadialLocation(double lat, double lon);
+
 };
 
 #endif // TRACKER_H

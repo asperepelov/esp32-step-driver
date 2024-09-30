@@ -1,7 +1,10 @@
 #include "Tracker.h"
+#include <math.h>
 
 Tracker::Tracker(StepMotor *motor, uint32_t azimPulsPerAngle, uint16_t azimSmothAngle, bool directionInversion, TrackerState state)
-    : _azimuthMotor(motor), _azimPulsPerAngle(azimPulsPerAngle), _azimSmothAngle(azimSmothAngle), _azimDirectionInversion(directionInversion) {
+    : _azimuthMotor(motor), _azimPulsPerAngle(azimPulsPerAngle), _azimSmothAngle(azimSmothAngle), _azimDirectionInversion(directionInversion) 
+    , _currentLocation(Location(48, 37))
+    {
         if (state == TrackerState::Offline) { this->offline();}
         if (state == TrackerState::Online) { this->online();}
     }
@@ -48,6 +51,14 @@ Result Tracker::setCurrentAzimuth(int16_t azimuth) {
         ResultCode::Success,
         "Установлен текущий азимут " + String(_currentAzimuth)
     );
+}
+
+Result Tracker::setCurrentLocation(Location loc) {
+    if (!loc.isValid()) {return Result(ResultCode::ParamOutOfRange, "Ошибка в локации");}
+
+    _currentLocation = loc;
+    
+    return Result(ResultCode::Success, "Новая локация трекера задана");
 }
 
 Result Tracker::turnAzimuthAngle(int16_t angle) {    
@@ -112,3 +123,29 @@ Result Tracker::turnToAzimuth(int16_t azimuth) {
     );
 }  
 
+RadialLocation Tracker::calcRadialLocation(double lat, double lon) {
+    const double R = 6371000; // Радиус Земли в метрах
+
+    // Преобразование градусов в радианы
+    double lat1Rad = _currentLocation._lat * M_PI / 180.0;
+    double lat2Rad = lat * M_PI / 180.0;
+    double lon1Rad = _currentLocation._lon * M_PI / 180.0;
+    double lon2Rad = lon * M_PI / 180.0;
+
+    // Разница координат
+    double dLat = lat2Rad - lat1Rad;
+    double dLon = lon2Rad - lon1Rad;
+
+    // Расстояние по широте
+    double latDistance = R * dLat;
+
+    // Расстояние по долготе
+    double lonDistance = R * dLon * cos((lat1Rad + lat2Rad) / 2);
+
+    RadialLocation result;
+    result.distance = sqrt(latDistance*latDistance + lonDistance*lonDistance);
+    result.azimuth = atan2(lonDistance, latDistance) * 180 / PI;
+    if (result.azimuth < 0) {result.azimuth += 360.0;}
+
+    return result;
+}
