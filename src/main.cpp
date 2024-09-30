@@ -30,6 +30,10 @@ EthernetManager ethernetManager(local_IP, gateway, netMask);
 WiFiServer tcpServer(TCP_PORT);
 //================================================================
 
+// Упаковка ответа в JSON
+String packResultToJson(const Result& res);
+
+
 void setup() {
   Serial.begin(115200);
   Serial.println("СТАРТ");
@@ -61,11 +65,12 @@ void loop() {
         line.trim();
         
         Result res = commandHandler.handleCommand(line);
+        String jsonRes = packResultToJson(res);
         if (res.code == ResultCode::Success) {
-          if (res.message != "") {client.println(res.message);}
+          if (res.message != "") {client.println(jsonRes);}
           else {client.println("Выполнено");}
         } else {
-          client.println("Ошибка: " + res.message);
+          client.println(jsonRes);
         }
       }
     }
@@ -75,4 +80,22 @@ void loop() {
   }
 
   delay(1);
+}
+
+
+// Упаковка ответа в JSON
+String packResultToJson(const Result& res) {
+    StaticJsonDocument<200> doc;
+    
+    doc["code"] = static_cast<int>(res.code);    
+    if (res.code == ResultCode::Success) {
+        doc["status"] = "success";
+    } else {
+        doc["status"] = "error";
+    }
+    doc["message"] = res.message;
+
+    String jsonString;
+    serializeJson(doc, jsonString);
+    return jsonString;
 }
