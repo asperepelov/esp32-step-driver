@@ -58,6 +58,7 @@ void loop() {
 
   if (client) {
     Serial.println("Новый клиент подключен");
+    client.println(packResultToJson(Result(ResultCode::Connected, "Соединение установлено")));
     
     while (client.connected()) {
       if (client.available()) {
@@ -90,6 +91,8 @@ String packResultToJson(const Result& res) {
     doc["code"] = static_cast<int>(res.code);    
     if (res.code == ResultCode::Success) {
         doc["status"] = "success";
+    } else if (res.code == ResultCode::Connected) {
+        doc["status"] = "connected";
     } else {
         doc["status"] = "error";
     }

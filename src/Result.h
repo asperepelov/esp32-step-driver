@@ -5,7 +5,8 @@
 
 // Коды результатов операций трекера
 enum class ResultCode {
-    Success,
+    Success = 0,
+    Connected,
     ParamOutOfRange,
     TrackerIsOffline,
     UnknownCommand,
