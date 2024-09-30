@@ -67,12 +67,7 @@ void loop() {
         
         Result res = commandHandler.handleCommand(line);
         String jsonRes = packResultToJson(res);
-        if (res.code == ResultCode::Success) {
-          if (res.message != "") {client.println(jsonRes);}
-          else {client.println("Выполнено");}
-        } else {
-          client.println(jsonRes);
-        }
+        client.println(jsonRes);
       }
     }
     
