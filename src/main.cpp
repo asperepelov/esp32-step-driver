@@ -145,15 +145,16 @@ void setup() {
   Serial.begin(115200);
   Serial.println("СТАРТ");
 
-    Serial.println("Инициализация Ethernet...");
-    if (ethernetManager.begin()) {
-        // wifiManager.setup();
-        tcpCommandServer.begin();
-        Serial.println("TCP сервер запущен");
-    } else {
-        Serial.println("Не удалось запустить Ethernet. Перезагрузка...");
-        ESP.restart();
-    }
+  delay(10000);
+  Serial.println("Инициализация Ethernet...");
+  if (ethernetManager.begin()) {
+      // wifiManager.setup();
+      tcpCommandServer.begin();
+      Serial.println("TCP сервер запущен");
+  } else {
+      Serial.println("Не удалось запустить Ethernet. Перезагрузка...");
+      ESP.restart();
+  }
 
   // Активируем двигатель трекера
   tracker.online();
