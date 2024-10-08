@@ -62,7 +62,7 @@ Result CommandHandler::handleCommand(const String& jsonString) {
     }
     else if (command == "get_info") {
         char str[256];
-        snprintf(str, sizeof(str), "{azimuth:%d, position:%s}", 
+        snprintf(str, sizeof(str), "{azimuth:%d, position:{%s}}", 
             _tracker->getCurrentAzimuth(),
             String(_tracker->getCurrentLocation()->operator String()).c_str());
         return Result(ResultCode::Success, str);
