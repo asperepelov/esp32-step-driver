@@ -17,7 +17,7 @@ Microstep = 4, 90град = 1080 импульсов, 1град = 12 импуль
 #define ENA_PIN 12 // GPIO14 (D14) подключен к ENA+ на TB6600
 
 StepMotor motor(STEP_PIN, DIR_PIN, ENA_PIN, 500, 2000);
-Tracker tracker(&motor, 12, 10, false, TrackerState::Online);
+Tracker tracker(&motor, 12, 30, false, TrackerState::Online);
 CommandHandler commandHandler(&tracker);
 //================================================================
 // Настройки сети
@@ -31,7 +31,7 @@ EthernetManager ethernetManager(local_IP, gateway, netMask);
 WiFiServer tcpCommandServer(TCP_COMMAND_PORT);
 //================================================================
 // TCP клиент для MAVLink
-#define MAVLINK_SERVER_IP "192.168.144.51"
+#define MAVLINK_SERVER_IP "192.168.144.53"
 #define MAVLINK_SERVER_PORT 5600
 WiFiClient mavlinkClient;
 //================================================================
@@ -92,6 +92,11 @@ void taskMavlinkCode(void * parameter) {
 
     for(;;) {
         try {
+            if (!tracker.isEnableINS()) {
+                Serial.println("Работа по ИНС отключена");
+                vTaskDelay(10000 / portTICK_PERIOD_MS);
+                continue;                
+            }
             if (!mavlinkClient.connected()) {
                 if (mavlinkClient.connect(MAVLINK_SERVER_IP, MAVLINK_SERVER_PORT)) {
                     Serial.println("Подключено к MAVLink серверу");

@@ -46,6 +46,7 @@ private:
     int16_t _currentAzimuth; // Текущий азимут от 0 до 360 град, 0 - является поворотной точкой
     TrackerState _currentState; // Текущее состояние трекера
     Location _currentLocation; // Текущая локация трекера
+    bool _enableINS; // Отключение / включение работы по ИНС
 
     Result checkAzimuth(int16_t azimuth); // Проверка допустимости азимута
 
@@ -76,6 +77,10 @@ public:
     lat - широта объекта в градусах
     lon - долгота объекта в градусах */
     RadialLocation calcRadialLocation(double lat, double lon);
+    Result enableINS();
+    Result disableINS();
+    bool isEnableINS() {return _enableINS;}
+
 
 };
 

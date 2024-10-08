@@ -29,6 +29,24 @@ Result Tracker::offline() {
     );
 }
 
+Result Tracker::enableINS() {
+    _enableINS = true;
+
+    return Result(
+        ResultCode::Success,
+        "Работа по ИНС активирована"
+    );
+}
+
+Result Tracker::disableINS() {
+    _enableINS = false;
+
+    return Result(
+        ResultCode::Success,
+        "Работа по ИНС отключена"
+    );
+}
+
 Result Tracker::checkAzimuth(int16_t azimuth) {
     if (azimuth < 0 || azimuth >= 360) {
         return Result(
@@ -62,12 +80,7 @@ Result Tracker::setCurrentLocation(Location loc) {
 }
 
 Result Tracker::turnAzimuthAngle(int16_t angle) {    
-    if (_currentState == TrackerState::Offline) {
-        return Result(
-            ResultCode::TrackerIsOffline,
-            "Трекер находится в оффлайн"
-        );
-    }
+    if (_currentState == TrackerState::Offline) {return Result(ResultCode::TrackerIsOffline, "Трекер находится в оффлайн");}
     
     // Азимут всегда от 0 до 360
     int16_t calcAngle = angle % 360;     

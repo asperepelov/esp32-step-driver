@@ -43,6 +43,16 @@ Result CommandHandler::handleCommand(const String& jsonString) {
             return Result(ResultCode::CommandError, "Недопустимое значение для set_online");
         }
     }
+    else if (command == "enable_ins") {
+        int value = doc["value"];
+        if (value == 1) {
+            return _tracker->enableINS();
+        } else if (value == 0) {
+            return _tracker->disableINS();
+        } else {
+            return Result(ResultCode::CommandError, "Недопустимое значение для set_online");
+        }
+    }    
     else if (command == "get_current_azimuth") {
         return Result(ResultCode::Success, String(_tracker->getCurrentAzimuth()));
     }
