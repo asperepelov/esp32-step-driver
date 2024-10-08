@@ -13,7 +13,8 @@ Result CommandHandler::handleCommand(const String& jsonString) {
 
     if (command != "set_location"
         && command != "get_current_location"
-        && command != "get_current_azimuth") 
+        && command != "get_current_azimuth"
+        && command != "get_info") 
     {
         if (!doc["value"].is<int>()) {return Result(ResultCode::CommandError, "Неверный формат команды");}        
     }
@@ -58,6 +59,13 @@ Result CommandHandler::handleCommand(const String& jsonString) {
     }
     else if (command == "get_current_location") {
         return Result(ResultCode::Success, (*_tracker->getCurrentLocation()));
+    }
+    else if (command == "get_info") {
+        char str[256];
+        snprintf(str, sizeof(str), "{azimuth:%d, position:%s}", 
+            _tracker->getCurrentAzimuth(),
+            String(_tracker->getCurrentLocation()->operator String()).c_str());
+        return Result(ResultCode::Success, str);
     }
     else {
         return Result(ResultCode::UnknownCommand, "Неизвестная команда: " + command);

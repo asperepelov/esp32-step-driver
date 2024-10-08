@@ -80,6 +80,7 @@ Result Tracker::setCurrentLocation(Location loc) {
 }
 
 Result Tracker::turnAzimuthAngle(int16_t angle) {    
+    Serial.println("Tracker::turnAzimuthAngle begin");
     if (_currentState == TrackerState::Offline) {return Result(ResultCode::TrackerIsOffline, "Трекер находится в оффлайн");}
     
     // Азимут всегда от 0 до 360
@@ -115,9 +116,10 @@ Result Tracker::turnAzimuthAngle(int16_t angle) {
     
     _currentAzimuth = newAzim;
 
+    Serial.println("Tracker::turnAzimuthAngle end");
     return Result(
         ResultCode::Success,
-        "Трекер повернулся по азимуту на " + String(calcAngle) + " градусов"
+        "Поворот по азимуту на " + String(calcAngle) + " градусов, текущий азимут " + String(_currentAzimuth)
     );
 }
 
@@ -132,7 +134,7 @@ Result Tracker::turnToAzimuth(int16_t azimuth) {
 
     return Result(
         ResultCode::Success,
-        "Трекер повернулся на азимут " + String(azimuth)
+        "Поворот на азимут " + String(azimuth)
     );
 }  
 

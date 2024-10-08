@@ -9,6 +9,7 @@ Microstep = 4, 90град = 1080 импульсов, 1град = 12 импуль
 #include "EthernetManager.h"
 #include <stdlib.h>
 #include <mavlink.h>
+#include "esp_task_wdt.h"
 
 //================================================================
 // Настройки трекера
@@ -165,6 +166,7 @@ void setup() {
   tracker.online();
   Serial.println("Трекер переведён в онлайн");
 
+  esp_task_wdt_init(10, true); // WDT тайм-аут, чтобы трекер успел повернуться на 360град
   xTaskCreatePinnedToCore(taskTcpCommandCode, "TCPCommand", 4096, NULL, 1, &taskTcpCommand, 0);
   xTaskCreatePinnedToCore(taskMavlinkCode, "MAVLink", 4096, NULL, 1, &taskMavlink, 1);
 }
