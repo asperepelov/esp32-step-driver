@@ -22,13 +22,13 @@ Tracker tracker(&motor, 12, 30, false, TrackerState::Online);
 CommandHandler commandHandler(&tracker);
 //================================================================
 // Настройки сети
-IPAddress local_IP(192, 168, 144, 54);
+IPAddress local_IP(192, 168, 144, 110);
 IPAddress gateway(192, 168, 144, 1);
 IPAddress netMask(255, 255, 255, 0);
 EthernetManager ethernetManager(local_IP, gateway, netMask);
 //================================================================
 // TCP сервер
-#define TCP_COMMAND_PORT 80
+#define TCP_COMMAND_PORT 5700
 WiFiServer tcpCommandServer(TCP_COMMAND_PORT);
 //================================================================
 // TCP клиент для MAVLink
